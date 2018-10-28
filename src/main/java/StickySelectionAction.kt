@@ -16,8 +16,8 @@ class StickySelectionAction : EditorAction(Handler()) {
                 val actionManager = EditorActionManager.getInstance()
                 actionManager.setActionHandler(IdeActions.ACTION_EDITOR_COPY, HandlerToDisable(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_COPY)))
                 actionManager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, HandlerToDisable(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)))
-                setSwapHandler(actionManager, IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT, IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT_WITH_SELECTION)
-                setSwapHandler(actionManager, IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT, IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT_WITH_SELECTION)
+                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT, LeftOrRightHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT)))
+                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT, LeftOrRightHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT)))
 
                 ourActionsRegistered = true
             }
@@ -71,11 +71,21 @@ class StickySelectionAction : EditorAction(Handler()) {
             }
         }
 
-        class SwapHandlerHandler(private val myOriginalHandler: EditorActionHandler, private val myWithSelectionHandler: EditorActionHandler) : EditorActionHandler() {
+        class LeftOrRightHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                val isSticky = editor.getUserData(IS_STICKY_SELECTION_KEY) ?: false
-                if (isSticky) myWithSelectionHandler.execute(editor, caret, dataContext)
-                else myOriginalHandler.execute(editor, caret, dataContext)
+                editor.caretModel.runForEachCaret { c ->
+                    val startPos = c.getUserData(STICKY_SELECTION_START_KEY)
+                    c.putUserData(TMP_STICKY_SELECTION_START_KEY, startPos)
+                    c.putUserData(STICKY_SELECTION_START_KEY, null)
+                    if (startPos != null) c.removeSelection()
+                }
+                myOriginalHandler.execute(editor, caret, dataContext)
+                editor.caretModel.runForEachCaret { c ->
+                    val startPos = c.getUserData(TMP_STICKY_SELECTION_START_KEY)
+                    c.putUserData(STICKY_SELECTION_START_KEY, startPos)
+                    c.putUserData(TMP_STICKY_SELECTION_START_KEY, null)
+                    if (startPos != null) c.setSelection(startPos, c.offset)
+                }
             }
         }
 
@@ -88,13 +98,9 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         companion object {
             private val STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.STICKY_SELECTION_START_KEY")
+            private val TMP_STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.TMP_STICKY_SELECTION_START_KEY")
             private val IS_STICKY_SELECTION_KEY = Key.create<Boolean>("StickySelectionHandler.IS_STICKY_SELECTION_KEY")
             private var ourActionsRegistered = false
-
-            private fun setSwapHandler(actionManager: EditorActionManager, originalHandlerId: String, withSelectionHandlerId: String) {
-                val swapHandler = SwapHandlerHandler(actionManager.getActionHandler(originalHandlerId), actionManager.getActionHandler(withSelectionHandlerId))
-                actionManager.setActionHandler(originalHandlerId, swapHandler)
-            }
 
             private fun setStickySelection(editor: Editor, enable: Boolean) {
                 editor.putUserData(IS_STICKY_SELECTION_KEY, enable)
