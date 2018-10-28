@@ -11,6 +11,8 @@
     <idea-version since-build="181"/>
 
     <actions>
-        <!-- Add your actions here -->
+        <action id="StickySelectionAction" class="StickySelectionAction" text="toggle sticky selection" description="toggle sticky selection">
+            <keyboard-shortcut first-keystroke="meta SEMICOLON" keymap="$default"/>
+        </action>
     </actions>
 </idea-plugin>
