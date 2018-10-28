@@ -21,35 +21,25 @@ class StickySelectionAction : EditorAction(Handler()) {
 
                 ourActionsRegistered = true
             }
-            val tmpIsSticky = editor.getUserData(IS_STICKY_SELECTION_KEY)
-            if (tmpIsSticky == null) {
+            if (editor.getUserData(HANDLER_REGISTERED_KEY) == null) {
                 editor.caretModel.addCaretListener(MyCaretListener())
                 editor.selectionModel.addSelectionListener(MySelectionListener())
                 editor.document.addDocumentListener(MyDocumentListener(editor))
+                editor.putUserData(HANDLER_REGISTERED_KEY, true)
             }
 
-            val newIsSticky = !(tmpIsSticky ?: false)
-            setStickySelection(editor, newIsSticky)
-            if (!newIsSticky) editor.selectionModel.removeSelection(true)
+            toggleStickySelection(editor)
         }
 
         private class MyDocumentListener(private val editor: Editor) : DocumentListener {
             override fun documentChanged(e: DocumentEvent?) {
                 e ?: return
-                editor.putUserData(IS_STICKY_SELECTION_KEY, false)
                 val caret = editor.caretModel.currentCaret
                 caret.putUserData(STICKY_SELECTION_START_KEY, null)
             }
         }
 
         private class MyCaretListener : CaretListener {
-            override fun caretAdded(e: CaretEvent) {
-                val caret = e.caret ?: return
-                if (e.editor.getUserData(IS_STICKY_SELECTION_KEY) == true) {
-                    caret.putUserData(STICKY_SELECTION_START_KEY, caret.offset)
-                }
-            }
-
             override fun caretPositionChanged(e: CaretEvent?) {
                 val caret = e?.caret ?: return
                 val start = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
@@ -99,20 +89,24 @@ class StickySelectionAction : EditorAction(Handler()) {
         companion object {
             private val STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.STICKY_SELECTION_START_KEY")
             private val TMP_STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.TMP_STICKY_SELECTION_START_KEY")
-            private val IS_STICKY_SELECTION_KEY = Key.create<Boolean>("StickySelectionHandler.IS_STICKY_SELECTION_KEY")
+            private val HANDLER_REGISTERED_KEY = Key.create<Boolean>("StickySelectionHandler.HANDLER_REGISTERED_KEY")
             private var ourActionsRegistered = false
 
-            private fun setStickySelection(editor: Editor, enable: Boolean) {
-                editor.putUserData(IS_STICKY_SELECTION_KEY, enable)
+            private fun toggleStickySelection(editor: Editor) {
                 editor.caretModel.runForEachCaret {
-                    if (enable) it.putUserData(STICKY_SELECTION_START_KEY, it.offset)
-                    else it.putUserData(STICKY_SELECTION_START_KEY, null)
+                    if (it.getUserData(STICKY_SELECTION_START_KEY) == null) it.putUserData(STICKY_SELECTION_START_KEY, it.offset)
+                    else {
+                        it.putUserData(STICKY_SELECTION_START_KEY, null)
+                        it.removeSelection()
+                    }
                 }
             }
 
             private fun disableAndRemoveSelection(editor: Editor) {
-                setStickySelection(editor, false)
-                editor.selectionModel.removeSelection(true)
+                editor.caretModel.runForEachCaret {
+                    it.putUserData(STICKY_SELECTION_START_KEY, null)
+                    it.removeSelection()
+                }
             }
         }
     }
