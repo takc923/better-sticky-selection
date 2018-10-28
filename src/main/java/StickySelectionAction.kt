@@ -103,8 +103,10 @@ class StickySelectionAction : EditorAction(Handler()) {
 
             private fun disableAndRemoveSelection(editor: Editor) {
                 editor.caretModel.runForEachCaret {
-                    it.putUserData(STICKY_SELECTION_START_KEY, null)
-                    it.removeSelection()
+                    if (it.getUserData(STICKY_SELECTION_START_KEY) != null) {
+                        it.putUserData(STICKY_SELECTION_START_KEY, null)
+                        it.removeSelection()
+                    }
                 }
             }
         }
