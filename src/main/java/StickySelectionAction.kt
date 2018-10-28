@@ -62,14 +62,11 @@ class StickySelectionAction : EditorAction(Handler()) {
             override fun selectionChanged(e: SelectionEvent?) {
                 e ?: return
                 val isRemoved = e.newRange.length == 0
-                val isSticky = e.editor.getUserData(IS_STICKY_SELECTION_KEY) ?: false
-                val isInitialPosition = e.editor.caretModel.allCarets.asSequence().mapNotNull {
-                    if (it.offset == it.getUserData(STICKY_SELECTION_START_KEY)) it.offset
-                    else null
-                }.contains(e.newRange.startOffset)
+                val caret = e.editor.caretModel.currentCaret
+                val isInitialPosition = caret.offset == caret.getUserData(STICKY_SELECTION_START_KEY)
 
-                if (isRemoved && isSticky && !isInitialPosition) {
-                    e.editor.selectionModel.setSelection(e.oldRange.startOffset, e.oldRange.endOffset)
+                if (isRemoved && !isInitialPosition) {
+                    caret.setSelection(e.oldRange.startOffset, e.oldRange.endOffset)
                 }
             }
         }
