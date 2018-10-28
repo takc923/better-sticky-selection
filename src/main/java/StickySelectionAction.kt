@@ -37,8 +37,7 @@ class StickySelectionAction : EditorAction(Handler()) {
             override fun documentChanged(e: DocumentEvent?) {
                 e ?: return
                 editor.putUserData(IS_STICKY_SELECTION_KEY, false)
-                val visualPos = editor.offsetToVisualPosition(e.offset)
-                val caret = editor.caretModel.getCaretAt(visualPos) ?: return
+                val caret = editor.caretModel.currentCaret
                 caret.putUserData(STICKY_SELECTION_START_KEY, null)
             }
         }
@@ -63,10 +62,11 @@ class StickySelectionAction : EditorAction(Handler()) {
                 e ?: return
                 val isRemoved = e.newRange.length == 0
                 val caret = e.editor.caretModel.currentCaret
-                val isInitialPosition = caret.offset == caret.getUserData(STICKY_SELECTION_START_KEY)
+                val startPos = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
+                val isInitialPosition = caret.offset == startPos
 
                 if (isRemoved && !isInitialPosition) {
-                    caret.setSelection(e.oldRange.startOffset, e.oldRange.endOffset)
+                    caret.setSelection(startPos, caret.offset)
                 }
             }
         }
