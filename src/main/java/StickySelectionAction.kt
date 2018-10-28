@@ -33,9 +33,7 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         private class MyDocumentListener(private val editor: Editor) : DocumentListener {
             override fun documentChanged(e: DocumentEvent?) {
-                e ?: return
-                val caret = editor.caretModel.currentCaret
-                caret.putUserData(STICKY_SELECTION_START_KEY, null)
+                editor.caretModel.currentCaret.putUserData(STICKY_SELECTION_START_KEY, null)
             }
         }
 
@@ -94,8 +92,9 @@ class StickySelectionAction : EditorAction(Handler()) {
 
             private fun toggleStickySelection(editor: Editor) {
                 editor.caretModel.runForEachCaret {
-                    if (it.getUserData(STICKY_SELECTION_START_KEY) == null) it.putUserData(STICKY_SELECTION_START_KEY, it.offset)
-                    else {
+                    if (it.getUserData(STICKY_SELECTION_START_KEY) == null) {
+                        it.putUserData(STICKY_SELECTION_START_KEY, it.offset)
+                    } else {
                         it.putUserData(STICKY_SELECTION_START_KEY, null)
                         it.removeSelection()
                     }
