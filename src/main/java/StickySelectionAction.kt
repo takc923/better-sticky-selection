@@ -75,10 +75,8 @@ class StickySelectionAction : EditorAction(Handler()) {
                     if (startPos != null) c.setSelection(startPos, c.offset)
                 }
             }
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean {
-                val doesStickyExists = editor.caretModel.allCarets.any { it.getUserData(STICKY_SELECTION_START_KEY) != null }
-                return doesStickyExists || myOriginalHandler.isEnabled(editor, caret, dataContext)
-            }
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
+                    caret.getUserData(STICKY_SELECTION_START_KEY) != null || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         class HandlerToDisable(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
@@ -86,10 +84,9 @@ class StickySelectionAction : EditorAction(Handler()) {
                 myOriginalHandler.execute(editor, caret, dataContext)
                 disableAndRemoveSelection(editor)
             }
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean {
-                val doesStickyExists = editor.caretModel.allCarets.any { it.getUserData(STICKY_SELECTION_START_KEY) != null }
-                return doesStickyExists || myOriginalHandler.isEnabled(editor, caret, dataContext)
-            }
+
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
+                    caret.getUserData(STICKY_SELECTION_START_KEY) != null || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         companion object {
