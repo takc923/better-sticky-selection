@@ -75,12 +75,20 @@ class StickySelectionAction : EditorAction(Handler()) {
                     if (startPos != null) c.setSelection(startPos, c.offset)
                 }
             }
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean {
+                val doesStickyExists = editor.caretModel.allCarets.any { it.getUserData(STICKY_SELECTION_START_KEY) != null }
+                return doesStickyExists || myOriginalHandler.isEnabled(editor, caret, dataContext)
+            }
         }
 
         class HandlerToDisable(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 myOriginalHandler.execute(editor, caret, dataContext)
                 disableAndRemoveSelection(editor)
+            }
+            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean {
+                val doesStickyExists = editor.caretModel.allCarets.any { it.getUserData(STICKY_SELECTION_START_KEY) != null }
+                return doesStickyExists || myOriginalHandler.isEnabled(editor, caret, dataContext)
             }
         }
 
