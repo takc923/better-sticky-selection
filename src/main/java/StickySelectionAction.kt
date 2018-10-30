@@ -63,17 +63,11 @@ class StickySelectionAction : EditorAction(Handler()) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 editor.caretModel.runForEachCaret { c ->
                     val startPos = c.getUserData(STICKY_SELECTION_START_KEY)
-                    c.putUserData(TMP_STICKY_SELECTION_START_KEY, startPos)
                     c.putUserData(STICKY_SELECTION_START_KEY, null)
                     if (startPos != null) c.removeSelection()
+                    c.putUserData(STICKY_SELECTION_START_KEY, startPos)
                 }
                 myOriginalHandler.execute(editor, caret, dataContext)
-                editor.caretModel.runForEachCaret { c ->
-                    val startPos = c.getUserData(TMP_STICKY_SELECTION_START_KEY)
-                    c.putUserData(STICKY_SELECTION_START_KEY, startPos)
-                    c.putUserData(TMP_STICKY_SELECTION_START_KEY, null)
-                    if (startPos != null) c.setSelection(startPos, c.offset)
-                }
             }
         }
 
@@ -100,7 +94,6 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         companion object {
             private val STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.STICKY_SELECTION_START_KEY")
-            private val TMP_STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.TMP_STICKY_SELECTION_START_KEY")
             private val HANDLER_REGISTERED_KEY = Key.create<Boolean>("StickySelectionHandler.HANDLER_REGISTERED_KEY")
             private var ourActionsRegistered = false
 
