@@ -59,7 +59,7 @@ class StickySelectionAction : EditorAction(Handler()) {
             }
         }
 
-        class LeftOrRightHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
+        class LeftOrRightHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 editor.caretModel.runForEachCaret { c ->
                     val startPos = c.getUserData(STICKY_SELECTION_START_KEY)
@@ -75,27 +75,25 @@ class StickySelectionAction : EditorAction(Handler()) {
                     if (startPos != null) c.setSelection(startPos, c.offset)
                 }
             }
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    caret.getUserData(STICKY_SELECTION_START_KEY) != null || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
-        class EscapeHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
+        class EscapeHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 val isSticky = editor.caretModel.allCarets.any { it.getUserData(STICKY_SELECTION_START_KEY) != null }
                 if (isSticky) disableAndRemoveSelection(editor)
                 else myOriginalHandler.execute(editor, caret, dataContext)
             }
 
-            override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    caret.getUserData(STICKY_SELECTION_START_KEY) != null || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
-        class CopyHandler(private val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
+        class CopyHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 myOriginalHandler.execute(editor, caret, dataContext)
                 disableAndRemoveSelection(editor)
             }
+        }
 
+        abstract class HandlerBase(protected val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
                     caret.getUserData(STICKY_SELECTION_START_KEY) != null || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
