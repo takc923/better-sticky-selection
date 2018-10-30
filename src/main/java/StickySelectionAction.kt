@@ -77,7 +77,6 @@ class StickySelectionAction : EditorAction(Handler()) {
                 if (isSticky) disableAndRemoveSelection(editor)
                 else myOriginalHandler.execute(editor, caret, dataContext)
             }
-
         }
 
         class CopyHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
