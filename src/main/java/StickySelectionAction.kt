@@ -32,11 +32,9 @@ class StickySelectionAction : EditorAction(Handler()) {
         }
 
         private class MyDocumentListener(private val editor: Editor) : DocumentListener {
-            override fun beforeDocumentChange(event: DocumentEvent?) {
-                editor.caretModel.allCarets
-                        .filter { it.getUserData(STICKY_SELECTION_START_KEY) != null }
-                        .forEach { it.putUserData(STICKY_SELECTION_START_KEY, null) }
-            }
+            override fun beforeDocumentChange(event: DocumentEvent?) = editor.caretModel.allCarets
+                    .filter { it.getUserData(STICKY_SELECTION_START_KEY) != null }
+                    .forEach { it.putUserData(STICKY_SELECTION_START_KEY, null) }
         }
 
         private class MyCaretListener : CaretListener {
