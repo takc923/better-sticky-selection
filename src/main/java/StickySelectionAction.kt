@@ -55,9 +55,7 @@ class StickySelectionAction : EditorAction(Handler()) {
                 val startPos = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
                 val isInitialPosition = caret.offset == startPos
 
-                if (isRemoved && !isInitialPosition) {
-                    caret.setSelection(startPos, caret.offset)
-                }
+                if (isRemoved && !isInitialPosition) caret.setSelection(startPos, caret.offset)
             }
         }
 
