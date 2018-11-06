@@ -43,6 +43,13 @@ class StickySelectionAction : EditorAction(Handler()) {
                 val start = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
                 caret.setSelection(start, caret.offset)
             }
+
+            override fun caretAdded(e: CaretEvent?) {
+                e ?: return
+                e.editor.caretModel.allCarets
+                        .filter { it.getUserData(STICKY_SELECTION_START_KEY) != null }
+                        .forEach { it.putUserData(STICKY_SELECTION_START_KEY, null) }
+            }
         }
 
         private class MySelectionListener : SelectionListener {
