@@ -32,29 +32,27 @@ class StickySelectionAction : EditorAction(Handler()) {
         }
 
         private class MyDocumentListener(private val editor: Editor) : DocumentListener {
-            override fun beforeDocumentChange(event: DocumentEvent?) = editor.caretModel.allCarets
-                    .filter { it.getUserData(STICKY_SELECTION_START_KEY) != null }
-                    .forEach { it.putUserData(STICKY_SELECTION_START_KEY, null) }
+            override fun beforeDocumentChange(event: DocumentEvent?) = disable(editor)
         }
 
         private class MyCaretListener : CaretListener {
             override fun caretPositionChanged(e: CaretEvent?) {
                 val caret = e?.caret ?: return
+                if (isDisabled(caret.editor)) return
                 val start = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
                 caret.setSelection(start, caret.offset)
             }
 
             override fun caretAdded(e: CaretEvent?) {
-                e ?: return
-                e.editor.caretModel.allCarets
-                        .filter { it.getUserData(STICKY_SELECTION_START_KEY) != null }
-                        .forEach { it.putUserData(STICKY_SELECTION_START_KEY, null) }
+                val caret = e?.caret ?: return
+                disable(caret.editor)
             }
         }
 
         private class MySelectionListener : SelectionListener {
             override fun selectionChanged(e: SelectionEvent?) {
                 e ?: return
+                if (isDisabled(e.editor)) return
                 val isRemoved = e.newRange.length == 0
                 val caret = e.editor.caretModel.currentCaret
                 val startPos = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
@@ -69,7 +67,7 @@ class StickySelectionAction : EditorAction(Handler()) {
                 editor.caretModel.runForEachCaret { c ->
                     val startPos = c.getUserData(STICKY_SELECTION_START_KEY)
                     c.putUserData(STICKY_SELECTION_START_KEY, null)
-                    if (startPos != null) c.removeSelection()
+                    if (isEnabled(editor)) c.removeSelection()
                     c.putUserData(STICKY_SELECTION_START_KEY, startPos)
                 }
                 myOriginalHandler.execute(editor, caret, dataContext)
@@ -78,8 +76,7 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         class EscapeHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                val isSticky = editor.caretModel.allCarets.any { it.getUserData(STICKY_SELECTION_START_KEY) != null }
-                if (isSticky) disableAndRemoveSelection(editor)
+                if (isEnabled(editor)) disableAndRemoveSelection(editor)
                 else myOriginalHandler.execute(editor, caret, dataContext)
             }
         }
@@ -98,24 +95,28 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         companion object {
             private val STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.STICKY_SELECTION_START_KEY")
+            private val STICKY_SELECTION_ACTIVE_KEY = Key.create<Unit>("StickySelectionHandler.STICKY_SELECTION_ACTIVE_KEY")
             private val HANDLER_REGISTERED_KEY = Key.create<Boolean>("StickySelectionHandler.HANDLER_REGISTERED_KEY")
             private var ourActionsRegistered = false
 
-            private fun toggleStickySelection(editor: Editor) = editor.caretModel.runForEachCaret {
-                if (it.getUserData(STICKY_SELECTION_START_KEY) == null) {
-                    it.putUserData(STICKY_SELECTION_START_KEY, it.offset)
-                } else {
-                    it.putUserData(STICKY_SELECTION_START_KEY, null)
-                    it.removeSelection()
-                }
+            private fun toggleStickySelection(editor: Editor) =
+                    if (isDisabled(editor)) {
+                        enable(editor)
+                        editor.caretModel.runForEachCaret { it.putUserData(STICKY_SELECTION_START_KEY, it.offset) }
+                    } else {
+                        disable(editor)
+                        editor.caretModel.runForEachCaret { it.removeSelection() }
+                    }
+
+            private fun disableAndRemoveSelection(editor: Editor) {
+                disable(editor)
+                editor.caretModel.runForEachCaret { it.removeSelection() }
             }
 
-            private fun disableAndRemoveSelection(editor: Editor) = editor.caretModel.runForEachCaret {
-                if (it.getUserData(STICKY_SELECTION_START_KEY) != null) {
-                    it.putUserData(STICKY_SELECTION_START_KEY, null)
-                    it.removeSelection()
-                }
-            }
+            private fun disable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, null)
+            private fun enable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, Unit)
+            private fun isEnabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == Unit
+            private fun isDisabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == null
         }
     }
 }
