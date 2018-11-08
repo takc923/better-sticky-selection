@@ -64,11 +64,10 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         class LeftOrRightHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                editor.caretModel.runForEachCaret { c ->
-                    val startPos = c.getUserData(STICKY_SELECTION_START_KEY)
-                    c.putUserData(STICKY_SELECTION_START_KEY, null)
-                    if (isEnabled(editor)) c.removeSelection()
-                    c.putUserData(STICKY_SELECTION_START_KEY, startPos)
+                if (isEnabled(editor)) {
+                    disable(editor)
+                    editor.caretModel.runForEachCaret { it.removeSelection() }
+                    enable(editor)
                 }
                 myOriginalHandler.execute(editor, caret, dataContext)
             }
