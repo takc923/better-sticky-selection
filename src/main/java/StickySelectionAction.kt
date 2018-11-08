@@ -90,7 +90,7 @@ class StickySelectionAction : EditorAction(Handler()) {
 
         abstract class HandlerBase(protected val myOriginalHandler: EditorActionHandler) : EditorActionHandler() {
             override fun isEnabledForCaret(editor: Editor, caret: Caret, dataContext: DataContext?): Boolean =
-                    caret.getUserData(STICKY_SELECTION_START_KEY) != null || myOriginalHandler.isEnabled(editor, caret, dataContext)
+                    isEnabled(editor) || myOriginalHandler.isEnabled(editor, caret, dataContext)
         }
 
         companion object {
