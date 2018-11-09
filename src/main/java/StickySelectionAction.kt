@@ -83,7 +83,7 @@ class StickySelectionAction : EditorAction(Handler()) {
         class CopyHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 myOriginalHandler.execute(editor, caret, dataContext)
-                disableAndRemoveSelection(editor)
+                if (isEnabled(editor)) disableAndRemoveSelection(editor)
             }
         }
 
