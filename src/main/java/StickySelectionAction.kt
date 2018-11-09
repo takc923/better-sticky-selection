@@ -39,7 +39,7 @@ class StickySelectionAction : EditorAction(Handler()) {
             override fun caretPositionChanged(e: CaretEvent?) {
                 val caret = e?.caret ?: return
                 if (isDisabled(caret.editor)) return
-                val start = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
+                val start = getStartPosition(caret) ?: return
                 caret.setSelection(start, caret.offset)
             }
 
@@ -55,7 +55,7 @@ class StickySelectionAction : EditorAction(Handler()) {
                 if (isDisabled(e.editor)) return
                 val isRemoved = e.newRange.length == 0
                 val caret = e.editor.caretModel.currentCaret
-                val startPos = caret.getUserData(STICKY_SELECTION_START_KEY) ?: return
+                val startPos = getStartPosition(caret) ?: return
                 val isInitialPosition = caret.offset == startPos
 
                 if (isRemoved && !isInitialPosition) caret.setSelection(startPos, caret.offset)
@@ -101,7 +101,7 @@ class StickySelectionAction : EditorAction(Handler()) {
             private fun toggleStickySelection(editor: Editor) =
                     if (isDisabled(editor)) {
                         enable(editor)
-                        editor.caretModel.runForEachCaret { it.putUserData(STICKY_SELECTION_START_KEY, it.offset) }
+                        editor.caretModel.runForEachCaret { putStartPosition(it) }
                     } else {
                         disable(editor)
                         editor.caretModel.runForEachCaret { it.removeSelection() }
@@ -116,6 +116,9 @@ class StickySelectionAction : EditorAction(Handler()) {
             private fun enable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, Unit)
             private fun isEnabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == Unit
             private fun isDisabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == null
+
+            private fun getStartPosition(caret: Caret) = caret.getUserData(STICKY_SELECTION_START_KEY)
+            private fun putStartPosition(caret: Caret) = caret.putUserData(STICKY_SELECTION_START_KEY, caret.offset)
         }
     }
 }
