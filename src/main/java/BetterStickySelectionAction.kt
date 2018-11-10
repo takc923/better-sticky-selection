@@ -8,7 +8,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.*
 import com.intellij.openapi.util.Key
 
-class StickySelectionAction : EditorAction(Handler()) {
+class BetterStickySelectionAction : EditorAction(Handler()) {
 
     internal class Handler : EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
