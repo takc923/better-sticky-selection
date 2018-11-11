@@ -14,7 +14,7 @@
     ]]></description>
 
     <depends>com.intellij.modules.lang</depends>
-    <idea-version since-build="181"/>
+    <idea-version since-build="183" />
 
     <actions>
         <action id="BetterStickySelectionAction" class="BetterStickySelectionAction" text="Toggle Better Sticky Selection" description="Toggle Better Sticky Selection">
