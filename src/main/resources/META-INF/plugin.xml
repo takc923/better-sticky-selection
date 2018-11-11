@@ -4,7 +4,13 @@
     <vendor url="https://github.com/takc923">takc923</vendor>
 
     <description><![CDATA[
-    Better Sticky Selection supports multiple carets.
+    <p>IntelliJ's original sticky selection doesn't support multi-carets.</p>
+    <p>This Better Sticky Selection plugin supports it.</p>
+    <p>Default keymap is</p>
+    <ul>
+      <li>C-;</li>
+    </ul>
+    <p>Please change it on your preference.</p>
     ]]></description>
 
     <depends>com.intellij.modules.lang</depends>
