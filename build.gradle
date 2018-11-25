@@ -28,7 +28,8 @@ dependencies {
 }
 
 intellij {
-    version '183.4284.36'
+    version '2018.3'
+    updateSinceUntilBuild false
 }
 patchPluginXml {
     changeNotes """
