@@ -32,26 +32,25 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
         }
 
         private class MyDocumentListener(private val editor: Editor) : DocumentListener {
-            override fun beforeDocumentChange(event: DocumentEvent?) = disable(editor)
+            override fun beforeDocumentChange(event: DocumentEvent) = disable(editor)
         }
 
         private class MyCaretListener : CaretListener {
-            override fun caretPositionChanged(e: CaretEvent?) {
-                val caret = e?.caret ?: return
+            override fun caretPositionChanged(e: CaretEvent) {
+                val caret = e.caret ?: return
                 if (isDisabled(caret.editor)) return
                 val start = getStartPosition(caret) ?: return
                 caret.setSelection(start, caret.offset)
             }
 
-            override fun caretAdded(e: CaretEvent?) {
-                val caret = e?.caret ?: return
+            override fun caretAdded(e: CaretEvent) {
+                val caret = e.caret ?: return
                 disable(caret.editor)
             }
         }
 
         private class MySelectionListener : SelectionListener {
-            override fun selectionChanged(e: SelectionEvent?) {
-                e ?: return
+            override fun selectionChanged(e: SelectionEvent) {
                 if (isDisabled(e.editor)) return
                 val isRemoved = e.newRange.length == 0
                 val caret = e.editor.caretModel.currentCaret
