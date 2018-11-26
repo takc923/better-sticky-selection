@@ -18,7 +18,9 @@
 
     <actions>
         <action id="BetterStickySelectionAction" class="BetterStickySelectionAction" text="Toggle Better Sticky Selection" description="Toggle Better Sticky Selection">
-            <keyboard-shortcut first-keystroke="meta SEMICOLON" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="Mac OS X 10.5+"/>
+            <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="Mac OS X"/>
+            <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="$default"/>
         </action>
     </actions>
 </idea-plugin>
