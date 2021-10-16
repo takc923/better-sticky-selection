@@ -14,30 +14,14 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
             if (!ourActionsRegistered) {
                 val actionManager = EditorActionManager.getInstance()
-                actionManager.setActionHandler(
-                    IdeActions.ACTION_EDITOR_COPY,
-                    CopyHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_COPY))
-                )
-                actionManager.setActionHandler(
-                    IdeActions.ACTION_EDITOR_ESCAPE,
-                    EscapeHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE))
-                )
-                actionManager.setActionHandler(
-                    IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT,
-                    LeftOrUpHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT))
-                )
-                actionManager.setActionHandler(
-                    IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT,
-                    RightOrDownHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT))
-                )
-                actionManager.setActionHandler(
-                    IdeActions.ACTION_EDITOR_MOVE_CARET_UP,
-                    LeftOrUpHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP))
-                )
-                actionManager.setActionHandler(
-                    IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN,
-                    RightOrDownHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN))
-                )
+                mapOf(
+                    IdeActions.ACTION_EDITOR_COPY to ::CopyHandler,
+                    IdeActions.ACTION_EDITOR_ESCAPE to ::EscapeHandler,
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT to ::LeftOrUpHandler,
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT to ::RightOrDownHandler,
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_UP to ::LeftOrUpHandler,
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN to ::RightOrDownHandler
+                ).forEach { (name, constructor) -> actionManager.setActionHandler(name, constructor(actionManager.getActionHandler(name))) }
 
                 ourActionsRegistered = true
             }
