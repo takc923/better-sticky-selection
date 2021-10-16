@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.*
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.registry.Registry
 
 class BetterStickySelectionAction : EditorAction(Handler()) {
 
@@ -14,10 +15,30 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
             if (!ourActionsRegistered) {
                 val actionManager = EditorActionManager.getInstance()
-                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_COPY, CopyHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_COPY)))
-                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, EscapeHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)))
-                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT, LeftOrRightHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT)))
-                actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT, LeftOrRightHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT)))
+                actionManager.setActionHandler(
+                    IdeActions.ACTION_EDITOR_COPY,
+                    CopyHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_COPY))
+                )
+                actionManager.setActionHandler(
+                    IdeActions.ACTION_EDITOR_ESCAPE,
+                    EscapeHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE))
+                )
+                actionManager.setActionHandler(
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT,
+                    LeftHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT))
+                )
+                actionManager.setActionHandler(
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT,
+                    RightHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT))
+                )
+                actionManager.setActionHandler(
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_UP,
+                    UpHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP))
+                )
+                actionManager.setActionHandler(
+                    IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN,
+                    DownHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN))
+                )
 
                 ourActionsRegistered = true
             }
@@ -61,11 +82,64 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
             }
         }
 
-        class LeftOrRightHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
+        class RightHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 if (isEnabled(editor)) {
                     disable(editor)
-                    editor.caretModel.runForEachCaret { it.removeSelection() }
+                    editor.caretModel.runForEachCaret { c ->
+                        if (c.offset == editor.document.textLength) {
+                            return@runForEachCaret
+                        }
+                        c.removeSelection()
+                    }
+                    enable(editor)
+                }
+                myOriginalHandler.execute(editor, caret, dataContext)
+            }
+        }
+
+        class LeftHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
+            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+                if (isEnabled(editor)) {
+                    disable(editor)
+                    editor.caretModel.runForEachCaret { c ->
+                        if (c.offset == 0) {
+                            return@runForEachCaret
+                        }
+                        c.removeSelection()
+                    }
+                    enable(editor)
+                }
+                myOriginalHandler.execute(editor, caret, dataContext)
+            }
+        }
+
+        class UpHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
+            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+                if (isEnabled(editor)) {
+                    disable(editor)
+                    editor.caretModel.runForEachCaret { c ->
+                        if (c.offset == 0) {
+                            return@runForEachCaret
+                        }
+                        c.removeSelection()
+                    }
+                    enable(editor)
+                }
+                myOriginalHandler.execute(editor, caret, dataContext)
+            }
+        }
+
+        class DownHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
+            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
+                if (isEnabled(editor)) {
+                    disable(editor)
+                    editor.caretModel.runForEachCaret { c ->
+                        if (c.offset == editor.document.textLength) {
+                            return@runForEachCaret
+                        }
+                        c.removeSelection()
+                    }
                     enable(editor)
                 }
                 myOriginalHandler.execute(editor, caret, dataContext)
