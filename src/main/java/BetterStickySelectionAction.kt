@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.*
 import com.intellij.openapi.util.Key
-import com.intellij.openapi.util.registry.Registry
 
 class BetterStickySelectionAction : EditorAction(Handler()) {
 
