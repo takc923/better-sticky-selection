@@ -123,7 +123,7 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
 
         companion object {
             private val STICKY_SELECTION_START_KEY = Key.create<Int>("StickySelectionHandler.STICKY_SELECTION_START_KEY")
-            private val STICKY_SELECTION_ACTIVE_KEY = Key.create<Unit>("StickySelectionHandler.STICKY_SELECTION_ACTIVE_KEY")
+            private val STICKY_SELECTION_ACTIVE_KEY = Key.create<Boolean>("StickySelectionHandler.STICKY_SELECTION_ACTIVE_KEY")
             private val HANDLER_REGISTERED_KEY = Key.create<Boolean>("StickySelectionHandler.HANDLER_REGISTERED_KEY")
             private var ourActionsRegistered = false
 
@@ -141,10 +141,10 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
                 editor.caretModel.runForEachCaret { it.removeSelection() }
             }
 
-            private fun disable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, null)
-            private fun enable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, Unit)
-            private fun isEnabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == Unit
-            private fun isDisabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == null
+            private fun disable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, false)
+            private fun enable(editor: Editor) = editor.putUserData(STICKY_SELECTION_ACTIVE_KEY, true)
+            private fun isEnabled(editor: Editor) = editor.getUserData(STICKY_SELECTION_ACTIVE_KEY) == true
+            private fun isDisabled(editor: Editor) = !isEnabled(editor)
 
             private fun getStartPosition(caret: Caret) = caret.getUserData(STICKY_SELECTION_START_KEY)
             private fun putStartPosition(caret: Caret) = caret.putUserData(STICKY_SELECTION_START_KEY, caret.offset)
