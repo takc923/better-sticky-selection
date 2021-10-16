@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'io.github.takc923'
-version '0.2-SNAPSHOT'
+version '0.2'
 
 sourceCompatibility = 11
 
@@ -32,5 +32,16 @@ intellij {
     updateSinceUntilBuild = false
 }
 patchPluginXml {
-    changeNotes = """<p>Initial release</p>"""
+    changeNotes = """
+      <p>v0.2</p>
+      <ul>
+        <li>Fix bug that up/down actions don't work correctly from IntelliJ 212.3116.29</li>
+        <li>Fix bug that selection unexpectedly disappears when caret is at start and end of document</li>
+        <li>Update dependencies</li>
+      </ul>
+      <p>v0.1</p>
+      <ul>
+        <li>Initial release</li>
+      </ul>
+"""
 }
