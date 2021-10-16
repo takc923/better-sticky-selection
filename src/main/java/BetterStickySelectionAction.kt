@@ -25,19 +25,19 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
                 )
                 actionManager.setActionHandler(
                     IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT,
-                    LeftHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT))
+                    LeftOrUpHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT))
                 )
                 actionManager.setActionHandler(
                     IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT,
-                    RightHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT))
+                    RightOrDownHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT))
                 )
                 actionManager.setActionHandler(
                     IdeActions.ACTION_EDITOR_MOVE_CARET_UP,
-                    UpHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP))
+                    LeftOrUpHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP))
                 )
                 actionManager.setActionHandler(
                     IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN,
-                    DownHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN))
+                    RightOrDownHandler(actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN))
                 )
 
                 ourActionsRegistered = true
@@ -82,12 +82,12 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
             }
         }
 
-        class RightHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
+        abstract class UpDownLeftRightHandlerBase(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 if (isEnabled(editor)) {
                     disable(editor)
                     editor.caretModel.runForEachCaret { c ->
-                        if (c.offset == editor.document.textLength) {
+                        if (willCaretMove(c, editor)) {
                             return@runForEachCaret
                         }
                         c.removeSelection()
@@ -96,54 +96,15 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
                 }
                 myOriginalHandler.execute(editor, caret, dataContext)
             }
+            abstract fun willCaretMove(caret: Caret, editor: Editor): Boolean
         }
 
-        class LeftHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
-            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled(editor)) {
-                    disable(editor)
-                    editor.caretModel.runForEachCaret { c ->
-                        if (c.offset == 0) {
-                            return@runForEachCaret
-                        }
-                        c.removeSelection()
-                    }
-                    enable(editor)
-                }
-                myOriginalHandler.execute(editor, caret, dataContext)
-            }
+        class RightOrDownHandler(myOriginalHandler: EditorActionHandler) : UpDownLeftRightHandlerBase(myOriginalHandler) {
+            override fun willCaretMove(caret: Caret, editor: Editor): Boolean = caret.offset == editor.document.textLength
         }
 
-        class UpHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
-            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled(editor)) {
-                    disable(editor)
-                    editor.caretModel.runForEachCaret { c ->
-                        if (c.offset == 0) {
-                            return@runForEachCaret
-                        }
-                        c.removeSelection()
-                    }
-                    enable(editor)
-                }
-                myOriginalHandler.execute(editor, caret, dataContext)
-            }
-        }
-
-        class DownHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
-            public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
-                if (isEnabled(editor)) {
-                    disable(editor)
-                    editor.caretModel.runForEachCaret { c ->
-                        if (c.offset == editor.document.textLength) {
-                            return@runForEachCaret
-                        }
-                        c.removeSelection()
-                    }
-                    enable(editor)
-                }
-                myOriginalHandler.execute(editor, caret, dataContext)
-            }
+        class LeftOrUpHandler(myOriginalHandler: EditorActionHandler) : UpDownLeftRightHandlerBase(myOriginalHandler) {
+            override fun willCaretMove(caret: Caret, editor: Editor): Boolean = caret.offset == 0
         }
 
         class EscapeHandler(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
