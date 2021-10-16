@@ -84,8 +84,20 @@ class BetterStickySelectionAction : EditorAction(Handler()) {
         abstract class UpDownLeftRightHandlerBase(myOriginalHandler: EditorActionHandler) : HandlerBase(myOriginalHandler) {
             public override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext) {
                 if (isEnabled(editor)) {
+                    // Carets behave like below.
+                    // - When caret moves left with selection, caret moves to selection start.
+                    // - When caret moves right with selection, caret moves to selection end.
+                    // - When caret moves up with selection, caret moves to selection start and then up one line since 212.3116.29.
+                    // - When caret moves down with selection, caret moves to selection end and then down one line since 212.3116.29.
+                    // These behavior conflicts with this plugin feature. So I remove selection here and make selection in `MySelectionListener`
+                    // And, disable before removing and enable after removing because the removing kicks `MySelectionListener`.
+                    // See
+                    // - https://github.com/JetBrains/intellij-community/blob/d5ce8e7e507c01ef32a3a1f85485a212333586fe/platform/platform-impl/src/com/intellij/openapi/editor/actions/MoveCaretLeftOrRightHandler.java
+                    // - https://github.com/JetBrains/intellij-community/blob/d5ce8e7e507c01ef32a3a1f85485a212333586fe/platform/platform-impl/src/com/intellij/openapi/editor/actions/MoveCaretUpOrDownHandler.java
                     disable(editor)
                     editor.caretModel.runForEachCaret { c ->
+                        // If remove selection in the case caret doesn't move,
+                        // the selection will have gone because `MySelectionListener` isn't called.
                         if (willCaretMove(c, editor)) {
                             return@runForEachCaret
                         }
