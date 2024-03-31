@@ -28,6 +28,16 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("231")
+        pluginDescription.set(
+            """
+            <p>IntelliJ's original sticky selection doesn't support multi-carets.</p>
+            <p>This Better Sticky Selection plugin supports it.</p>
+            <p>Default keymap is</p>
+            <ul>
+              <li>C-;</li>
+            </ul>
+            <p>Please change it on your preference.</p>
+            """.trimIndent())
         changeNotes.set(
                 """
                 <p>v0.2</p>
