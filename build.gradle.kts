@@ -37,19 +37,21 @@ tasks {
               <li>C-;</li>
             </ul>
             <p>Please change it on your preference.</p>
-            """.trimIndent())
+            """.trimIndent()
+        )
         changeNotes.set(
-                """
-                <p>v0.2</p>
-                <ul>
-                  <li>Fix bug that up/down actions don't work correctly from IntelliJ 212.3116.29</li>
-                  <li>Fix bug that selection unexpectedly disappears when caret is at start and end of document</li>
-                  <li>Update dependencies</li>
-                </ul>
-                <p>v0.1</p>
-                <ul>
-                  <li>Initial release</li>
-                </ul>
-                """.trimIndent())
+            """
+            <p>v0.2</p>
+            <ul>
+              <li>Fix bug that up/down actions don't work correctly from IntelliJ 212.3116.29</li>
+              <li>Fix bug that selection unexpectedly disappears when caret is at start and end of document</li>
+              <li>Update dependencies</li>
+            </ul>
+            <p>v0.1</p>
+            <ul>
+              <li>Initial release</li>
+            </ul>
+            """.trimIndent()
+        )
     }
 }
