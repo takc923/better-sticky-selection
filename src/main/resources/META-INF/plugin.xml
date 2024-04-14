@@ -7,9 +7,18 @@
 
     <actions>
         <action id="BetterStickySelectionAction" class="BetterStickySelectionAction" text="Toggle Better Sticky Selection">
+            <!-- Adds "command ;" to macOS keymaps, and adds "control ;" to other OS keymaps -->
+            <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="$default"/>
+
+            <!-- Adds "control ;" to macOS keymaps -->
+            <!-- Until v2023.3 or somewhere, the setting replaces the $default keymap, "command ;" with "control ;". -->
+            <!-- But on the newer JetBrains IDE, it doesn't replace "command ;", but just add "control ;" -->
             <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="Mac OS X 10.5+"/>
             <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="Mac OS X"/>
-            <keyboard-shortcut first-keystroke="ctrl SEMICOLON" keymap="$default"/>
+
+            <!-- Remove "command ;" from macOS keymaps -->
+            <keyboard-shortcut first-keystroke="meta SEMICOLON" keymap="Mac OS X 10.5+" remove="true"/>
+            <keyboard-shortcut first-keystroke="meta SEMICOLON" keymap="Mac OS X" remove="true"/>
         </action>
     </actions>
 </idea-plugin>
