@@ -1,7 +1,10 @@
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
-    id("org.jetbrains.intellij") version "1.17.2"
+    kotlin("jvm") version "2.1.10"
+    id("org.jetbrains.intellij.platform") version "2.10.4"
 }
 
 group = "io.github.takc923"
@@ -9,27 +12,39 @@ version = "0.4-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-intellij {
-    version.set("2023.1")
-    updateSinceUntilBuild.set(false)
-    pluginName.set("better-sticky-selection")
+dependencies {
+    intellijPlatform {
+        intellijIdeaCommunity("2025.2.1")
+    }
 }
 
-tasks {
-    withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-    }
+}
 
-    patchPluginXml {
-        sinceBuild.set("231")
-        pluginDescription.set(
-            """
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        id = "io.github.takc923.better-sticky-selection"
+        name = "Better Sticky Selection"
+        version = project.version.toString()
+        ideaVersion {
+            sinceBuild = "252"
+        }
+        description = """
             <p>IntelliJ's original sticky selection doesn't support multi-carets.</p>
             <p>This Better Sticky Selection plugin supports it.</p>
             <p>Default keymap is</p>
@@ -37,10 +52,8 @@ tasks {
               <li>C-;</li>
             </ul>
             <p>Please change it on your preference.</p>
-            """.trimIndent()
-        )
-        changeNotes.set(
-            """
+        """.trimIndent()
+        changeNotes = """
             <p>v0.2</p>
             <ul>
               <li>Fix bug that up/down actions don't work correctly from IntelliJ 212.3116.29</li>
@@ -51,7 +64,6 @@ tasks {
             <ul>
               <li>Initial release</li>
             </ul>
-            """.trimIndent()
-        )
+        """.trimIndent()
     }
 }
